@@ -17,8 +17,12 @@ from unittest import mock
 import pytest
 
 from redfish_client.connector import Connector, Response
-from redfish_client.exceptions import (BlacklistedValueException,
-    MissingOidException, TimedOutException, ResourceNotFound)
+from redfish_client.exceptions import (
+    BlacklistedValueException,
+    MissingOidException,
+    ResourceNotFound,
+    TimedOutException,
+)
 from redfish_client.resource import Resource
 
 
@@ -31,18 +35,18 @@ class TestGetKey:
     def test_wrong_id(self):
         connector = mock.Mock(spec=Connector)
         with pytest.raises(ResourceNotFound):
-            Resource(connector, oid="id", data={}).raw
+            _ = Resource(connector, oid="id", data={}).raw
 
     def test_wrong_id_without_fail_oid(self):
         assert Resource(None, oid="id", data={})["@odata.id"] == "id"
 
     def test_get_invalid_key(self):
         with pytest.raises(KeyError):
-            Resource(None, data={})['Invalid_key']
+            _ = Resource(None, data={})["Invalid_key"]
 
     def test_get_invalid_attribute(self):
         with pytest.raises(AttributeError, match=".+ 'Invalid_Attribute'"):
-            Resource(None, data={}).Invalid_Attribute
+            _ = Resource(None, data={}).Invalid_Attribute
 
     def test_dig(self):
         assert Resource(None, data={
@@ -312,8 +316,8 @@ class TestLazyResource:
         })
 
         r = Resource(connector, oid="id")
-        r.a
-        r.a
+        r.a  # noqa
+        r.a  # noqa
         assert r._is_lazy
         assert not r._is_stub
         assert connector.get.call_count == 1
@@ -331,7 +335,7 @@ class TestLazyResource:
         child_0 = parent.Members[0]
         child_1 = parent.Members[1]
 
-        child_0.raw  # access the first child
+        child_0.raw  # noqa  access the first child
 
         assert child_0._is_lazy
         assert child_1._is_lazy

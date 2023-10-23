@@ -5,3 +5,4 @@ redfish_client.egg-info
 .coverage
 htmlcov
 dist
+build/

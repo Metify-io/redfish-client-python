@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from redfish_client.connector import Connector
 from redfish_client.caching_connector import CachingConnector
+from redfish_client.connector import Connector
 from redfish_client.root import Root
 
 

@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+
 import pytest
 
 from redfish_client.connector import Connector
@@ -367,8 +368,8 @@ class TestReset:
 
 class TestLogging:
     def test_logging_get(self, mocker, requests_mock):
-        logging_debug_mock = mocker.patch.object(logging.Logger, 'debug')
-        logging_error_mock = mocker.patch.object(logging.Logger, 'error')
+        logging_debug_mock = mocker.patch.object(logging.Logger, "debug")
+        logging_error_mock = mocker.patch.object(logging.Logger, "error")
         requests_mock.get("https://demo.dev/1", [
             dict(status_code=200, json=dict(hello="fish")),
             dict(status_code=200, json=dict(hello="bear")),
@@ -383,7 +384,7 @@ class TestLogging:
                                 '"method": "GET", "base_url": "https://demo.dev", '
                                 '"path": "/1", "payload": null, "headers": null}'
                             '}'),
-                mocker.call('GET https://demo.dev/1 200'),
+                mocker.call("GET https://demo.dev/1 200"),
                 mocker.call('{"request_data": '
                             '{"method": "GET", "base_url": "https://demo.dev", "path": "/1"}, '
                             '"response": {"status_code": 200, "headers": {}, '
@@ -394,8 +395,8 @@ class TestLogging:
         )
 
     def test_logging_post(self, mocker, requests_mock):
-        logging_debug_mock = mocker.patch.object(logging.Logger, 'debug')
-        logging_error_mock = mocker.patch.object(logging.Logger, 'error')
+        logging_debug_mock = mocker.patch.object(logging.Logger, "debug")
+        logging_error_mock = mocker.patch.object(logging.Logger, "error")
         requests_mock.post("https://demo.dev/1", [
             dict(status_code=200, json=dict(hello="fish")),
             dict(status_code=200, json=dict(hello="bear")),
@@ -410,7 +411,7 @@ class TestLogging:
                                 '"method": "POST", "base_url": "https://demo.dev", '
                                 '"path": "/1", "payload": {"iam": "cat"}, "headers": null}'
                             '}'),
-                mocker.call('POST https://demo.dev/1 200'),
+                mocker.call("POST https://demo.dev/1 200"),
                 mocker.call('{"request_data": '
                             '{"method": "POST", "base_url": "https://demo.dev", "path": "/1"}, '
                             '"response": {"status_code": 200, "headers": {}, '

@@ -1,3 +1,11 @@
+#!/usr/bin/make -f
+
+.ONESHELL:
+
+-include .env
+
+SHELL = /bin/bash
+
 init:
 	pipenv install -d
 
@@ -12,5 +20,5 @@ lint:
 	pipenv run pylint redfish_client
 
 publish:
-	python3 setup.py sdist bdist_wheel
-	python3 -m twine upload dist/*
+	pipenv run python setup.py sdist bdist_wheel
+	pipenv run python -m twine upload -r metify-internal dist/*
