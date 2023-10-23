@@ -22,8 +22,7 @@ import requests
 
 from redfish_client.exceptions import AuthException, InaccessibleException
 
-
-logger = logging.getLogger('redfish-client')
+logger = logging.getLogger("redfish-client")
 Response = collections.namedtuple("Response", "status headers json raw")
 
 

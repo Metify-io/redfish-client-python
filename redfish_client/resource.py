@@ -18,9 +18,9 @@ from functools import reduce
 
 from redfish_client.exceptions import (
     BlacklistedValueException,
-    TimedOutException,
     MissingOidException,
-    ResourceNotFound
+    ResourceNotFound,
+    TimedOutException,
 )
 
 
