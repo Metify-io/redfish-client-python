@@ -1,0 +1,22 @@
+select = [
+    "B",    # bugbear: https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    "DJ",   # django: https://beta.ruff.rs/docs/rules/#flake8-django-dj
+    "E",    # errors: https://beta.ruff.rs/docs/rules/#error-e
+    "F",    # pyflakes: https://beta.ruff.rs/docs/rules/#pyflakes-f
+    "I",    # isort: https://beta.ruff.rs/docs/rules/#isort-i
+    "N",    # naming: https://beta.ruff.rs/docs/rules/#pep8-naming-n
+    "PL",   # pylint: https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PTH",  # pathlib: https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
+    "Q",    # quotes: https://beta.ruff.rs/docs/rules/#flake8-quotes-q
+    "T10",  # debugger: https://beta.ruff.rs/docs/rules/#flake8-debugger-t10
+    "T20",  # print: https://beta.ruff.rs/docs/rules/#flake8-print-t20
+    "W",    # warnings: https://beta.ruff.rs/docs/rules/#warning-w
+]
+line-length = 100
+target-version = "py311"
+ignore = [
+    "PLR2004",  # Constants
+    "B904",     # Raising exceptions "from"
+    "PLR0913",  # Too many arguments
+    "N818",     # "Error" suffix on Exceptions
+]

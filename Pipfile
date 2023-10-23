@@ -4,11 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 requests-mock = "*"
+twine = "*"
+ruff = "*"
 
 [packages]
-redfish-client = {editable = true,path = "."}
+redfish-client = {editable = true, path = "."}
