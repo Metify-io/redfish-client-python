@@ -6,3 +6,4 @@ redfish_client.egg-info
 htmlcov
 dist
 build/
+Pipfile.lock

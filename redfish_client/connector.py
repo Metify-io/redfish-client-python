@@ -158,10 +158,17 @@ class Connector:
         resp = self._client.post(self._url(self._session_path), json=dict(
             UserName=self._username, Password=self._password,
         ), timeout=self._timeout)
-        if resp.status_code != 201:
+        if resp.status_code not in [201, 204]:
             raise AuthException("Cannot create session: {}".format(resp.text))
 
-        self._set_header("x-auth-token", resp.headers["x-auth-token"])
+        if resp.status_code == 201:
+            # 201: Redfish standard
+            self._set_header("x-auth-token", resp.headers["x-auth-token"])
+        else:
+            # 204: Redfish Mock Server standard
+            # No auth token is returned so set to anything
+            self._set_header("x-auth-token", resp.headers.get("location"))
+
         # We combine with `or` here because the default value of the dict.get
         # method is eagerly evaluated, which is not what we want.
         sess_id = resp.headers.get("location") or resp.json()["@odata.id"]

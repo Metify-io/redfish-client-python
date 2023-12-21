@@ -17,8 +17,15 @@ coverage:
 	xdg-open htmlcov/index.html
 
 lint:
-	pipenv run pylint redfish_client
+	pipenv run ruff redfish_client
 
 publish:
+	rm -f dist/*
+
+	pipenv --rm
+	rm Pipfile.lock
+	pipenv --python 3.11
+	pipenv install --dev
 	pipenv run python setup.py sdist bdist_wheel
+
 	pipenv run python -m twine upload -r metify-internal dist/*

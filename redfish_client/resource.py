@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
 import operator
 import time
 from functools import reduce
@@ -129,6 +129,9 @@ class Resource:
             else:
                 return None
         return resource
+
+    def jp(self):
+        return json.dumps(self.raw, indent=4, sort_keys=True)
 
     def find_object(self, key):
         """ Recursively search for a key and return key's content """
