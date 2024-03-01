@@ -85,9 +85,13 @@ class Connector:
         except Exception as e:
             logger.error(e)
 
-    def _request(self, method, path, payload=None, headers=None):
+    def _request(self, method, path, payload=None, headers=None, data=None, files=None):
         self._log_request(method, path, payload, headers)
         args = dict(json=payload) if payload is not None else {}
+        if data is not None:
+            args["data"] = data
+        if files is not None:
+            args["files"] = files
         try:
             resp = self._client.request(
                 method,
