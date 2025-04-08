@@ -29,10 +29,7 @@ Response = collections.namedtuple("Response", "status headers json raw")
 class Connector:
     # Default headers, as required by Redfish spec
     # https://redfish.dmtf.org/schemas/DSP0266_1.5.0.html#request-headers
-    DEFAULT_HEADERS = {
-        "Accept": "application/json",
-        "OData-Version": "4.0"
-    }
+    DEFAULT_HEADERS = {"Accept": "application/json", "OData-Version": "4.0"}
     DEFAULT_TIMEOUT = 1  # In seconds
 
     def __init__(self, base_url, username, password, verify=True, timeout=DEFAULT_TIMEOUT):
@@ -55,33 +52,37 @@ class Connector:
 
     def _log_request(self, method, path, payload, headers):
         try:
-            logger.debug(json.dumps(dict(
-                request=dict(
-                    method=method,
-                    base_url=self._base_url,
-                    path=path,
-                    payload=payload,
-                    headers=headers,
+            logger.debug(
+                json.dumps(
+                    dict(
+                        request=dict(
+                            method=method,
+                            base_url=self._base_url,
+                            path=path,
+                            payload=payload,
+                            headers=headers,
+                        )
+                    )
                 )
-            )))
+            )
         except Exception as e:
             logger.error(e)
 
     def _log_response(self, method, path, response, json_data):
         try:
-            logger.debug(json.dumps(dict(
-                request_data=dict(
-                    method=method,
-                    base_url=self._base_url,
-                    path=path
-                ),
-                response=dict(
-                    status_code=response.status_code,
-                    headers=dict(response.headers.lower_items()),
-                    content=str(response.content),
-                    json_data=json_data
+            logger.debug(
+                json.dumps(
+                    dict(
+                        request_data=dict(method=method, base_url=self._base_url, path=path),
+                        response=dict(
+                            status_code=response.status_code,
+                            headers=dict(response.headers.lower_items()),
+                            content=str(response.content),
+                            json_data=json_data,
+                        ),
+                    )
                 )
-            )))
+            )
         except Exception as e:
             logger.error(e)
 
@@ -94,25 +95,16 @@ class Connector:
             args["files"] = files
         try:
             resp = self._client.request(
-                method,
-                self._url(path),
-                **args,
-                headers=headers,
-                timeout=self._timeout
+                method, self._url(path), **args, headers=headers, timeout=self._timeout
             )
         except requests.exceptions.ConnectionError:
-            raise InaccessibleException(
-                "Endpoint at {} is not accessible".format(self._base_url))
+            raise InaccessibleException("Endpoint at {} is not accessible".format(self._base_url))
 
         if resp.status_code == 401:
             self._unset_header("x-auth-token")
             self.login()
             resp = self._client.request(
-                method,
-                self._url(path),
-                **args,
-                headers=headers,
-                timeout=self._timeout
+                method, self._url(path), **args, headers=headers, timeout=self._timeout
             )
 
         try:
@@ -159,9 +151,14 @@ class Connector:
         return bool(self._session_path)
 
     def _session_login(self):
-        resp = self._client.post(self._url(self._session_path), json=dict(
-            UserName=self._username, Password=self._password,
-        ), timeout=self._timeout)
+        resp = self._client.post(
+            self._url(self._session_path),
+            json=dict(
+                UserName=self._username,
+                Password=self._password,
+            ),
+            timeout=self._timeout,
+        )
         if resp.status_code not in [201, 204]:
             raise AuthException("Cannot create session: {}".format(resp.text))
 
@@ -189,12 +186,13 @@ class Connector:
         self._unset_header("x-auth-token")
 
     def _basic_login(self):
-        secret = "Basic {}".format(base64.b64encode(
-            "{}:{}".format(self._username, self._password).encode("ascii"),
-        ).decode("ascii"))
+        secret = "Basic {}".format(
+            base64.b64encode(
+                "{}:{}".format(self._username, self._password).encode("ascii"),
+            ).decode("ascii")
+        )
         resp = self._client.get(
-            self._url(self._basic_path), headers=dict(authorization=secret),
-            timeout=self._timeout
+            self._url(self._basic_path), headers=dict(authorization=secret), timeout=self._timeout
         )
         if resp.status_code != 200:
             raise AuthException("Invalid credentials")

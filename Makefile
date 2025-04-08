@@ -17,7 +17,8 @@ coverage:
 	xdg-open htmlcov/index.html
 
 lint:
-	pipenv run ruff redfish_client
+	pipenv run ruff check redfish_client tests --fix
+	pipenv run ruff format redfish_client tests
 
 publish:
 	rm -rf dist/*

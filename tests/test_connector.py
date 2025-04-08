@@ -35,7 +35,8 @@ class TestInit:
 class TestLogin:
     def test_basic_login(self, requests_mock):
         requests_mock.get(
-            "https://demo.dev/test_auth", status_code=200,
+            "https://demo.dev/test_auth",
+            status_code=200,
             request_headers=dict(Authorization="Basic dXNlcjpwYXNz"),
         )
         conn = Connector("https://demo.dev", "user", "pass")
@@ -51,13 +52,11 @@ class TestLogin:
 
     def test_session_login_id_in_location_header(self, requests_mock):
         def matcher(req):
-            return (
-                req.json()["UserName"] == "user" and
-                req.json()["Password"] == "pass"
-            )
+            return req.json()["UserName"] == "user" and req.json()["Password"] == "pass"
 
         requests_mock.post(
-            "https://demo.dev/sessions", additional_matcher=matcher,
+            "https://demo.dev/sessions",
+            additional_matcher=matcher,
             status_code=201,
             headers={"X-Auth-Token": "abc", "Location": "/sessions/1"},
         )
@@ -67,14 +66,13 @@ class TestLogin:
 
     def test_session_login_id_in_body(self, requests_mock):
         def matcher(req):
-            return (
-                req.json()["UserName"] == "user1" and
-                req.json()["Password"] == "pass1"
-            )
+            return req.json()["UserName"] == "user1" and req.json()["Password"] == "pass1"
 
         requests_mock.post(
-            "https://demo.dev/sessions", additional_matcher=matcher,
-            status_code=201, headers={"X-Auth-Token": "abc"},
+            "https://demo.dev/sessions",
+            additional_matcher=matcher,
+            status_code=201,
+            headers={"X-Auth-Token": "abc"},
             json={"@odata.id": "/sessions/1"},
         )
         conn = Connector("https://demo.dev", "user1", "pass1")
@@ -83,7 +81,9 @@ class TestLogin:
 
     def test_session_login_invalid_credentials(self, requests_mock):
         requests_mock.post(
-            "https://demo.dev/sessions", status_code=400, text="Invalid",
+            "https://demo.dev/sessions",
+            status_code=400,
+            text="Invalid",
         )
         conn = Connector("https://demo.dev", "user1", "pass1")
         conn.set_session_auth_data("/sessions")
@@ -103,7 +103,8 @@ class TestSessionAuthData:
 
     def test_active_session(self, requests_mock):
         requests_mock.post(
-            "http://demo.site/sessions", status_code=201,
+            "http://demo.site/sessions",
+            status_code=201,
             headers={"x-auth-token": "xyz", "Location": "/sessions/1"},
         )
         conn = Connector("http://demo.site", "", "")
@@ -125,7 +126,8 @@ class TestLogout:
 
     def test_session_logout(self, requests_mock):
         requests_mock.delete(
-            "https://demo.dev/sessions/1", status_code=204,
+            "https://demo.dev/sessions/1",
+            status_code=204,
             request_headers={"X-Auth-Token": "abc"},
         )
         conn = Connector("https://demo.dev", "user1", "pass1")
@@ -147,7 +149,9 @@ class TestLogout:
 class TestGet:
     def test_get_no_auth(self, requests_mock):
         requests_mock.get(
-            "https://demo.dev/data", status_code=200, json=dict(hello="fish"),
+            "https://demo.dev/data",
+            status_code=200,
+            json=dict(hello="fish"),
         )
         conn = Connector("https://demo.dev", "user", "pass")
         r = conn.get("/data")
@@ -163,7 +167,9 @@ class TestGet:
 
     def test_get_non_200(self, requests_mock):
         requests_mock.get(
-            "https://demo.dev/data", status_code=404, json=dict(error="bad"),
+            "https://demo.dev/data",
+            status_code=404,
+            json=dict(error="bad"),
         )
         conn = Connector("https://demo.dev", "user", "pass")
         r = conn.get("/data")
@@ -175,11 +181,13 @@ class TestGet:
         # matched in bottom-up order.
         requests_mock.get("https://demo.dev/data", status_code=401)
         requests_mock.get(
-            "https://demo.dev/test", status_code=200,
+            "https://demo.dev/test",
+            status_code=200,
             request_headers=dict(Authorization="Basic dXNlcjpwYXNz"),
         )
         requests_mock.get(
-            "https://demo.dev/data", status_code=200,
+            "https://demo.dev/data",
+            status_code=200,
             request_headers=dict(Authorization="Basic dXNlcjpwYXNz"),
         )
         conn = Connector("https://demo.dev", "user", "pass")
@@ -189,11 +197,16 @@ class TestGet:
         assert r.json is None
 
     def test_get_session_relogin(self, requests_mock):
-        requests_mock.get("https://demo.dev/data", [
-            dict(status_code=401), dict(status_code=200),
-        ])
+        requests_mock.get(
+            "https://demo.dev/data",
+            [
+                dict(status_code=401),
+                dict(status_code=200),
+            ],
+        )
         requests_mock.post(
-            "https://demo.dev/sessions", status_code=201,
+            "https://demo.dev/sessions",
+            status_code=201,
             headers={"X-Auth-Token": "123", "Location": "/sessions/3"},
         )
         conn = Connector("https://demo.dev", "user", "pass")
@@ -217,15 +230,21 @@ class TestGet:
         # This is why we mocked the POST request twice: to test that the
         # token is not present. And because mocked endpoints are matched in
         # LIFO order, the test works as described before.
-        requests_mock.get("https://demo.dev/data", [
-            dict(status_code=401), dict(status_code=200),
-        ])
+        requests_mock.get(
+            "https://demo.dev/data",
+            [
+                dict(status_code=401),
+                dict(status_code=200),
+            ],
+        )
         requests_mock.post(
-            "https://demo.dev/sessions", status_code=201,
+            "https://demo.dev/sessions",
+            status_code=201,
             headers={"X-Auth-Token": "123", "Location": "/sessions/3"},
         )
         requests_mock.post(
-            "https://demo.dev/sessions", status_code=401,
+            "https://demo.dev/sessions",
+            status_code=401,
             request_headers={"x-auth-token": "abc"},
         )
         conn = Connector("https://demo.dev", "user", "pass")
@@ -236,7 +255,8 @@ class TestGet:
 
     def test_get_use_existing_session(self, requests_mock):
         requests_mock.get(
-            "https://demo.dev/data", status_code=200,
+            "https://demo.dev/data",
+            status_code=200,
             request_headers={"X-Auth-Token": "123"},
         )
         conn = Connector("https://demo.dev", "user", "pass")
@@ -246,19 +266,25 @@ class TestGet:
         assert r.json is None
 
     def test_get_caching_ok(self, requests_mock):
-        requests_mock.get("https://demo.dev/data", [
-            dict(status_code=200, json=dict(hello="fish")),
-            dict(status_code=200, json=dict(solong="fish")),
-        ])
+        requests_mock.get(
+            "https://demo.dev/data",
+            [
+                dict(status_code=200, json=dict(hello="fish")),
+                dict(status_code=200, json=dict(solong="fish")),
+            ],
+        )
         conn = Connector("https://demo.dev", None, None)
         assert conn.get("/data").json == dict(hello="fish")
         assert conn.get("/data").json == dict(solong="fish")
 
     def test_get_caching_non_ok(self, requests_mock):
-        requests_mock.get("https://demo.dev/data", [
-            dict(status_code=404, json=dict(error="bad")),
-            dict(status_code=500, json=dict(really="bad")),
-        ])
+        requests_mock.get(
+            "https://demo.dev/data",
+            [
+                dict(status_code=404, json=dict(error="bad")),
+                dict(status_code=500, json=dict(really="bad")),
+            ],
+        )
         conn = Connector("https://demo.dev", None, None)
         assert conn.get("/data").json == dict(error="bad")
         assert conn.get("/data").json == dict(really="bad")
@@ -273,7 +299,8 @@ class TestPost:
 
     def test_post_with_payload(self, requests_mock):
         requests_mock.post(
-            "https://demo.dev/post", status_code=200,
+            "https://demo.dev/post",
+            status_code=200,
             additional_matcher=lambda r: r.json()["post"] == "payload",
         )
         conn = Connector("https://demo.dev", None, None)
@@ -282,8 +309,7 @@ class TestPost:
 
     def test_post_empty_payload(self, requests_mock):
         requests_mock.post(
-            "https://demo.dev/post", status_code=200,
-            additional_matcher=lambda r: r.json() == {}
+            "https://demo.dev/post", status_code=200, additional_matcher=lambda r: r.json() == {}
         )
         conn = Connector("https://demo.dev", None, None)
         status, *_ = conn.post("/post", dict())
@@ -299,7 +325,8 @@ class TestPatch:
 
     def test_patch_with_payload(self, requests_mock):
         requests_mock.patch(
-            "https://demo.dev/patch", status_code=200,
+            "https://demo.dev/patch",
+            status_code=200,
             additional_matcher=lambda r: r.json()["patch"] == "payload",
         )
         conn = Connector("https://demo.dev", None, None)
@@ -308,8 +335,7 @@ class TestPatch:
 
     def test_patch_empty_payload(self, requests_mock):
         requests_mock.patch(
-            "https://demo.dev/patch", status_code=200,
-            additional_matcher=lambda r: r.json() == {}
+            "https://demo.dev/patch", status_code=200, additional_matcher=lambda r: r.json() == {}
         )
         conn = Connector("https://demo.dev", None, None)
         status, *_ = conn.patch("/patch", dict())
@@ -319,7 +345,8 @@ class TestPatch:
 class TestPut:
     def test_put_with_payload(self, requests_mock):
         requests_mock.put(
-            "https://demo.dev/put", status_code=200,
+            "https://demo.dev/put",
+            status_code=200,
             additional_matcher=lambda r: r.json()["put"] == "payload",
         )
         conn = Connector("https://demo.dev", None, None)
@@ -338,14 +365,20 @@ class TestDelete:
 class TestReset:
     @staticmethod
     def mock_paths(mock):
-        mock.get("https://demo.dev/1", [
-            dict(status_code=200, json=dict(hello="fish")),
-            dict(status_code=200, json=dict(hello="bear")),
-        ])
-        mock.get("https://demo.dev/2", [
-            dict(status_code=200, json=dict(solong="fish")),
-            dict(status_code=200, json=dict(solong="bear")),
-        ])
+        mock.get(
+            "https://demo.dev/1",
+            [
+                dict(status_code=200, json=dict(hello="fish")),
+                dict(status_code=200, json=dict(hello="bear")),
+            ],
+        )
+        mock.get(
+            "https://demo.dev/2",
+            [
+                dict(status_code=200, json=dict(solong="fish")),
+                dict(status_code=200, json=dict(solong="bear")),
+            ],
+        )
 
     def test_reset_all(self, requests_mock):
         self.mock_paths(requests_mock)
@@ -370,53 +403,67 @@ class TestLogging:
     def test_logging_get(self, mocker, requests_mock):
         logging_debug_mock = mocker.patch.object(logging.Logger, "debug")
         logging_error_mock = mocker.patch.object(logging.Logger, "error")
-        requests_mock.get("https://demo.dev/1", [
-            dict(status_code=200, json=dict(hello="fish")),
-            dict(status_code=200, json=dict(hello="bear")),
-        ])
+        requests_mock.get(
+            "https://demo.dev/1",
+            [
+                dict(status_code=200, json=dict(hello="fish")),
+                dict(status_code=200, json=dict(hello="bear")),
+            ],
+        )
         conn = Connector("https://demo.dev", "user", "pass")
         conn.get("/1")
 
         logging_error_mock.assert_not_called()
         logging_debug_mock.assert_has_calls(
             [
-                mocker.call('{"request": {'
-                                '"method": "GET", "base_url": "https://demo.dev", '
-                                '"path": "/1", "payload": null, "headers": null}'
-                            '}'),
+                mocker.call(
+                    '{"request": {'
+                    '"method": "GET", "base_url": "https://demo.dev", '
+                    '"path": "/1", "payload": null, "headers": null}'
+                    "}"
+                ),
                 mocker.call("GET https://demo.dev/1 200"),
-                mocker.call('{"request_data": '
-                            '{"method": "GET", "base_url": "https://demo.dev", "path": "/1"}, '
-                            '"response": {"status_code": 200, "headers": {}, '
-                                '"content": "b\'{\\"hello\\": \\"fish\\"}\'", '
-                                '"json_data": {"hello": "fish"}}'
-                            '}')
+                mocker.call(
+                    '{"request_data": '
+                    '{"method": "GET", "base_url": "https://demo.dev", "path": "/1"}, '
+                    '"response": {"status_code": 200, "headers": {}, '
+                    '"content": "b\'{\\"hello\\": \\"fish\\"}\'", '
+                    '"json_data": {"hello": "fish"}}'
+                    "}"
+                ),
             ]
         )
 
     def test_logging_post(self, mocker, requests_mock):
         logging_debug_mock = mocker.patch.object(logging.Logger, "debug")
         logging_error_mock = mocker.patch.object(logging.Logger, "error")
-        requests_mock.post("https://demo.dev/1", [
-            dict(status_code=200, json=dict(hello="fish")),
-            dict(status_code=200, json=dict(hello="bear")),
-        ])
+        requests_mock.post(
+            "https://demo.dev/1",
+            [
+                dict(status_code=200, json=dict(hello="fish")),
+                dict(status_code=200, json=dict(hello="bear")),
+            ],
+        )
         conn = Connector("https://demo.dev", "user", "pass")
         conn.post("/1", payload=dict(iam="cat"))
 
         logging_error_mock.assert_not_called()
         logging_debug_mock.assert_has_calls(
             [
-                mocker.call('{"request": {'
-                                '"method": "POST", "base_url": "https://demo.dev", '
-                                '"path": "/1", "payload": {"iam": "cat"}, "headers": null}'
-                            '}'),
+                mocker.call(
+                    '{"request": {'
+                    '"method": "POST", "base_url": "https://demo.dev", '
+                    '"path": "/1", "payload": {"iam": "cat"}, "headers": null}'
+                    "}"
+                ),
                 mocker.call("POST https://demo.dev/1 200"),
-                mocker.call('{"request_data": '
-                            '{"method": "POST", "base_url": "https://demo.dev", "path": "/1"}, '
-                            '"response": {"status_code": 200, "headers": {}, '
-                                '"content": "b\'{\\"hello\\": \\"fish\\"}\'", '
-                                '"json_data": {"hello": "fish"}}'
-                            '}')
+                mocker.call(
+                    '{"request_data": '
+                    '{"method": "POST", "base_url": "https://demo.dev", "path": "/1"}, '
+                    '"response": {"status_code": 200, "headers": {}, '
+                    '"content": "b\'{\\"hello\\": \\"fish\\"}\'", '
+                    '"json_data": {"hello": "fish"}}'
+                    "}"
+                ),
             ]
         )

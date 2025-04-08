@@ -20,7 +20,11 @@ class Root(Resource):
         content = self._get_content()
         sessions = content.get("Links", {}).get("Sessions", {})
         authenticated_path = next(
-            i["@odata.id"] for i in content.values() if "@odata.id" in i
+            # supermicro can send none here which causes this to blow up,
+            # so we need to check that we actually have a value
+            i["@odata.id"]
+            for i in content.values()
+            if i and "@odata.id" in i
         )
         if "@odata.id" in sessions:
             self._connector.set_session_auth_data(sessions["@odata.id"])

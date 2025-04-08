@@ -28,9 +28,10 @@ from redfish_client.resource import Resource
 
 class TestGetKey:
     def test_get_value_of_a_key(self):
-        assert Resource(None, data={
-            "ProcessorSummary": {"State": "Enabled"}
-        }).ProcessorSummary.State == "Enabled"
+        assert (
+            Resource(None, data={"ProcessorSummary": {"State": "Enabled"}}).ProcessorSummary.State
+            == "Enabled"
+        )
 
     def test_wrong_id(self):
         connector = mock.Mock(spec=Connector)
@@ -49,48 +50,57 @@ class TestGetKey:
             _ = Resource(None, data={}).Invalid_Attribute
 
     def test_dig(self):
-        assert Resource(None, data={
-            "ProcessorSummary": {"State": "Enabled"}
-        }).dig("ProcessorSummary", "State") == "Enabled"
+        assert (
+            Resource(None, data={"ProcessorSummary": {"State": "Enabled"}}).dig(
+                "ProcessorSummary", "State"
+            )
+            == "Enabled"
+        )
 
     def test_keys_in_dir(self):
-        res = Resource(None,data={
-            "ProcessorSummary": {"State": "Enabled"},
-            "@odata.dummy": "Dummy",
-        })
+        res = Resource(
+            None,
+            data={
+                "ProcessorSummary": {"State": "Enabled"},
+                "@odata.dummy": "Dummy",
+            },
+        )
         assert "ProcessorSummary" in dir(res)
         assert "@odata.dummy" not in dir(res)
         assert "dig" in dir(res)
         assert "_get_content" not in dir(res)
 
+
 class TestExecuteAction:
-    def setup_method(self,):
+    def setup_method(
+        self,
+    ):
         self.connector = mock.Mock(spec=Connector)
 
     def test_execute_action_without_actions_key(self):
         with pytest.raises(KeyError):
-            Resource(self.connector, data={
-            }).execute_action("#ComputerSystem.Reset", "payload")
+            Resource(self.connector, data={}).execute_action("#ComputerSystem.Reset", "payload")
 
     def test_execute_action(self):
-        Resource(self.connector, data={
-            "Actions": {"#ComputerSystem.Reset": {"target": "/reset/"}}
-        }).execute_action("#ComputerSystem.Reset", "payload")
+        Resource(
+            self.connector, data={"Actions": {"#ComputerSystem.Reset": {"target": "/reset/"}}}
+        ).execute_action("#ComputerSystem.Reset", "payload")
 
         self.connector.post.assert_called_once_with("/reset/", payload="payload")
 
     def test_execute_action_multilevel(self):
-        Resource(self.connector, data={
-            "Actions": {"Oem": {"#ComputerSystem.CustomizedReset": {"target": "/reset/"}}}
-        }).execute_action("#ComputerSystem.CustomizedReset", "payload")
+        Resource(
+            self.connector,
+            data={"Actions": {"Oem": {"#ComputerSystem.CustomizedReset": {"target": "/reset/"}}}},
+        ).execute_action("#ComputerSystem.CustomizedReset", "payload")
 
         self.connector.post.assert_called_once_with("/reset/", payload="payload")
 
     def test_execute_invalid_action(self):
         with pytest.raises(KeyError):
-            Resource(self.connector, data={
-                "Actions": {"#ComputerSystem.Reset": {"target": "/reset/"}}
-            }).execute_action("#ComputerSystem.InvalidAction", "payload")
+            Resource(
+                self.connector, data={"Actions": {"#ComputerSystem.Reset": {"target": "/reset/"}}}
+            ).execute_action("#ComputerSystem.InvalidAction", "payload")
 
 
 @mock.patch("time.sleep")
@@ -103,75 +113,82 @@ class TestWaitFor:
 
     def test_wait_for_no_oid(self, mock_sleep):
         with pytest.raises(MissingOidException):
-            Resource(None, data={
-                "PowerState": "On"
-            }).wait_for(["PowerState"], "Off")
+            Resource(None, data={"PowerState": "On"}).wait_for(["PowerState"], "Off")
 
     def test_wait_for_refresh_missing_oid(self, mock_sleep):
-        connector = self.build_connector([
-            {"PowerState": "On"},
-        ])
+        connector = self.build_connector(
+            [
+                {"PowerState": "On"},
+            ]
+        )
         with pytest.raises(MissingOidException):
-            Resource(connector, data={
-                "@odata.id": "id",
-                "PowerState": "On"
-            }).wait_for(["PowerState"], "Off")
+            Resource(connector, data={"@odata.id": "id", "PowerState": "On"}).wait_for(
+                ["PowerState"], "Off"
+            )
 
     def test_wait_for_value(self, mock_sleep):
-        connector = self.build_connector([
-            {"@odata.id": "id", "PowerState": "On"},
-            {"@odata.id": "id", "PowerState": "On"},
-            {"@odata.id": "id", "PowerState": "Off"}
-        ])
-        assert Resource(connector, data={
-            "@odata.id": "id",
-            "PowerState": "On"
-        }).wait_for(["PowerState"], "Off") is True
+        connector = self.build_connector(
+            [
+                {"@odata.id": "id", "PowerState": "On"},
+                {"@odata.id": "id", "PowerState": "On"},
+                {"@odata.id": "id", "PowerState": "Off"},
+            ]
+        )
+        assert (
+            Resource(connector, data={"@odata.id": "id", "PowerState": "On"}).wait_for(
+                ["PowerState"], "Off"
+            )
+            is True
+        )
 
     def test_wait_for_invalid_value(self, mock_sleep):
-        connector = self.build_connector([
-            {"@odata.id": "id", "PowerState": "On"},
-            {"@odata.id": "id", "PowerState": "On"},
-            {"@odata.id": "id", "PowerState": "Fail"}
-        ])
+        connector = self.build_connector(
+            [
+                {"@odata.id": "id", "PowerState": "On"},
+                {"@odata.id": "id", "PowerState": "On"},
+                {"@odata.id": "id", "PowerState": "Fail"},
+            ]
+        )
         with pytest.raises(BlacklistedValueException):
-            Resource(connector, data={
-                "@odata.id": "id",
-                "PowerState": "On"
-            }).wait_for(["PowerState"], "Off", blacklisted=("Fail", ))
+            Resource(connector, data={"@odata.id": "id", "PowerState": "On"}).wait_for(
+                ["PowerState"], "Off", blacklisted=("Fail",)
+            )
 
     def test_wait_for_timeout(self, mock_sleep):
-        connector = self.build_connector(cycle([
-            {"@odata.id": "id", "PowerState": "On"},
-        ]))
+        connector = self.build_connector(
+            cycle(
+                [
+                    {"@odata.id": "id", "PowerState": "On"},
+                ]
+            )
+        )
         with pytest.raises(TimedOutException):
-            Resource(connector, data={
-                "@odata.id": "id",
-                "PowerState": "On"
-            }).wait_for(["PowerState"], "Off", timeout=0.1)
+            Resource(connector, data={"@odata.id": "id", "PowerState": "On"}).wait_for(
+                ["PowerState"], "Off", timeout=0.1
+            )
 
 
 class TestPost:
     def test_post_on_resource(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/EventService/Subscriptions/"
-        }).post(payload={"Destination": "http://123.10.10.234"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/EventService/Subscriptions/"}).post(
+            payload={"Destination": "http://123.10.10.234"}
+        )
         connector.post.assert_called_once_with(
             "/redfish/v1/EventService/Subscriptions/",
             payload={"Destination": "http://123.10.10.234"},
-            headers=None
+            headers=None,
         )
 
     def test_post_on_resource_custom_header(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/EventService/Subscriptions/"
-        }).post(payload={"Destination": "http://123.10.10.234"}, headers={"Custom": "Header"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/EventService/Subscriptions/"}).post(
+            payload={"Destination": "http://123.10.10.234"}, headers={"Custom": "Header"}
+        )
         connector.post.assert_called_once_with(
             "/redfish/v1/EventService/Subscriptions/",
             payload={"Destination": "http://123.10.10.234"},
-            headers={"Custom": "Header"}
+            headers={"Custom": "Header"},
         )
 
     def test_post_on_resource_invalid(self):
@@ -183,24 +200,20 @@ class TestPost:
 class TestDelete:
     def test_delete_a_resource(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Managers/Steampunk/Accounts/4"
-            }
+        Resource(
+            connector, data={"@odata.id": "/redfish/v1/Managers/Steampunk/Accounts/4"}
         ).delete()
         connector.delete.assert_called_once_with(
-            "/redfish/v1/Managers/Steampunk/Accounts/4",
-            headers=None
+            "/redfish/v1/Managers/Steampunk/Accounts/4", headers=None
         )
 
     def test_delete_a_resource_custom_header(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Managers/Steampunk/Accounts/4"
-            }
-        ).delete(headers={"Custom": "Header"})
-        connector.delete.assert_called_once_with(
-            "/redfish/v1/Managers/Steampunk/Accounts/4",
+        Resource(connector, data={"@odata.id": "/redfish/v1/Managers/Steampunk/Accounts/4"}).delete(
             headers={"Custom": "Header"}
+        )
+        connector.delete.assert_called_once_with(
+            "/redfish/v1/Managers/Steampunk/Accounts/4", headers={"Custom": "Header"}
         )
 
     def test_delete_an_invalid_resource(self):
@@ -212,24 +225,20 @@ class TestDelete:
 class TestPatch:
     def test_patch_a_resource(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Systems/1"
-        }).patch(payload={"Misc": "MyValue"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/Systems/1"}).patch(
+            payload={"Misc": "MyValue"}
+        )
         connector.patch.assert_called_once_with(
-            "/redfish/v1/Systems/1",
-            payload={"Misc": "MyValue"},
-            headers=None
+            "/redfish/v1/Systems/1", payload={"Misc": "MyValue"}, headers=None
         )
 
     def test_patch_a_resource_custom_header(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Systems/1"
-        }).patch(payload={"Misc": "MyValue"}, headers={"Custom": "Header"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/Systems/1"}).patch(
+            payload={"Misc": "MyValue"}, headers={"Custom": "Header"}
+        )
         connector.patch.assert_called_once_with(
-            "/redfish/v1/Systems/1",
-            payload={"Misc": "MyValue"},
-            headers={"Custom": "Header"}
+            "/redfish/v1/Systems/1", payload={"Misc": "MyValue"}, headers={"Custom": "Header"}
         )
 
     def test_patch_an_invalid_resource(self):
@@ -241,35 +250,29 @@ class TestPatch:
 class TestPut:
     def test_put_a_resource(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Systems/1"
-        }).put(payload={"Misc": "MyValue"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/Systems/1"}).put(
+            payload={"Misc": "MyValue"}
+        )
         connector.put.assert_called_once_with(
-            "/redfish/v1/Systems/1",
-            payload={"Misc": "MyValue"},
-            headers=None
+            "/redfish/v1/Systems/1", payload={"Misc": "MyValue"}, headers=None
         )
 
     def test_put_a_resource_custom_header(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Systems/1"
-        }).put(payload={"Misc": "MyValue"}, headers={"Custom": "Header"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/Systems/1"}).put(
+            payload={"Misc": "MyValue"}, headers={"Custom": "Header"}
+        )
         connector.put.assert_called_once_with(
-            "/redfish/v1/Systems/1",
-            payload={"Misc": "MyValue"},
-            headers={"Custom": "Header"}
+            "/redfish/v1/Systems/1", payload={"Misc": "MyValue"}, headers={"Custom": "Header"}
         )
 
     def test_put_a_resource_with_path(self):
         connector = mock.Mock(spec=Connector)
-        Resource(connector, data={
-            "@odata.id": "/redfish/v1/Systems/1"
-        }).put(path="/redfish/v1/custom/path", payload={"Misc": "MyValue"})
+        Resource(connector, data={"@odata.id": "/redfish/v1/Systems/1"}).put(
+            path="/redfish/v1/custom/path", payload={"Misc": "MyValue"}
+        )
         connector.put.assert_called_once_with(
-            "/redfish/v1/custom/path",
-            payload={"Misc": "MyValue"},
-            headers=None
+            "/redfish/v1/custom/path", payload={"Misc": "MyValue"}, headers=None
         )
 
     def test_put_an_invalid_resource(self):
@@ -281,12 +284,15 @@ class TestPut:
 class TestRefresh:
     def test_refresh_eager_resource(self):
         connector = mock.Mock(spec=Connector)
-        connector.get.return_value = mock.MagicMock(status=200, json={
-            "@odata.id": "id",
-            "a": "val",
-        })
+        connector.get.return_value = mock.MagicMock(
+            status=200,
+            json={
+                "@odata.id": "id",
+                "a": "val",
+            },
+        )
         r = Resource(connector, oid="id", lazy=False)  # first GET
-        r.refresh()                                    # second GET
+        r.refresh()  # second GET
         assert not r._is_stub
         assert r._content == {"@odata.id": "id", "a": "val"}
         assert connector.get.call_count == 2
@@ -310,10 +316,13 @@ class TestLazyResource:
 
     def test_loaded_on_first_access_only(self):
         connector = mock.Mock(spec=Connector)
-        connector.get.return_value = mock.MagicMock(status=200, json={
-            "@odata.id": "id",
-            "a": "val",
-        })
+        connector.get.return_value = mock.MagicMock(
+            status=200,
+            json={
+                "@odata.id": "id",
+                "a": "val",
+            },
+        )
 
         r = Resource(connector, oid="id")
         r.a  # noqa
@@ -324,13 +333,16 @@ class TestLazyResource:
 
     def test_load_only_accessed_child(self):
         connector = mock.Mock(spec=Connector)
-        connector.get.return_value = mock.MagicMock(status=200, json={
-            "@odata.id": "parent",
-            "Members": [
-                {"@odata.id": "child_0"},
-                {"@odata.id": "child_1"},
-            ],
-        })
+        connector.get.return_value = mock.MagicMock(
+            status=200,
+            json={
+                "@odata.id": "parent",
+                "Members": [
+                    {"@odata.id": "child_0"},
+                    {"@odata.id": "child_1"},
+                ],
+            },
+        )
         parent = Resource(connector, oid="parent")
         child_0 = parent.Members[0]
         child_1 = parent.Members[1]

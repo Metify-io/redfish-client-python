@@ -82,9 +82,7 @@ class Resource:
 
     def _build_from_hash(self, data):
         if "@odata.id" in data:
-            return Resource(
-                self._connector, oid=data["@odata.id"], lazy=self._is_lazy
-            )
+            return Resource(self._connector, oid=data["@odata.id"], lazy=self._is_lazy)
         return Resource(self._connector, data=data, lazy=self._is_lazy)
 
     def refresh(self):
@@ -134,7 +132,7 @@ class Resource:
         return json.dumps(self.raw, indent=4, sort_keys=True)
 
     def find_object(self, key):
-        """ Recursively search for a key and return key's content """
+        """Recursively search for a key and return key's content"""
         if key in self._get_content().keys():
             return self[key]
 
@@ -160,8 +158,12 @@ class Resource:
         raise KeyError("Action with {} does not exist".format(action_name))
 
     def wait_for(
-            self, stat, expected, blacklisted=None, poll_interval=3,
-            timeout=15,
+        self,
+        stat,
+        expected,
+        blacklisted=None,
+        poll_interval=3,
+        timeout=15,
     ):
         """
         :param stat: list or tuple of keys
@@ -191,9 +193,7 @@ class Resource:
                     "Detected blacklisted value '{}'".format(actual_value)
                 )
             time.sleep(poll_interval)
-        raise TimedOutException(
-            "Could not wait for stat {} in time".format(stat)
-        )
+        raise TimedOutException("Could not wait for stat {} in time".format(stat))
 
     @property
     def raw(self):

@@ -1,4 +1,4 @@
-select = [
+lint.select = [
     "B",    # bugbear: https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "DJ",   # django: https://beta.ruff.rs/docs/rules/#flake8-django-dj
     "E",    # errors: https://beta.ruff.rs/docs/rules/#error-e
@@ -14,7 +14,7 @@ select = [
 ]
 line-length = 100
 target-version = "py311"
-ignore = [
+lint.ignore = [
     "PLR2004",  # Constants
     "B904",     # Raising exceptions "from"
     "PLR0913",  # Too many arguments
